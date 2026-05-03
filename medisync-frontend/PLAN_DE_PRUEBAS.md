@@ -3,7 +3,7 @@
 **Proyecto:** MediSync — Plataforma de Gestión Médica Digital  
 **Rol:** Desarrollador Web  
 **Materia:** Diseño y Arquitectura de Software  
-**Universidad:** Tecmilenio — 2025  
+**Universidad:** Tecmilenio — 2026
 **Framework de pruebas:** Vitest 4.x + @testing-library/react
 
 ---
