@@ -1,0 +1,53 @@
+import { doctoresMock } from './doctoresMock'
+import { pacientesMock } from './pacientesMock'
+
+export const citasMock = [
+  {
+    id: 1,
+    paciente_id: 1,
+    doctor_id: 1,
+    fecha: new Date().toISOString(),
+    hora_inicio: '09:00:00',
+    hora_fin: '09:30:00',
+    motivo: 'Consulta general',
+    estado: 'agendada',
+    doctor: { nombre: doctoresMock[0].nombre, especialidad: doctoresMock[0].especialidad },
+    paciente: { nombre: pacientesMock[0].nombre },
+  },
+  {
+    id: 2,
+    paciente_id: 2,
+    doctor_id: 2,
+    fecha: new Date().toISOString(),
+    hora_inicio: '10:00:00',
+    hora_fin: '10:45:00',
+    motivo: 'Revisión pediátrica',
+    estado: 'agendada',
+    doctor: { nombre: doctoresMock[1].nombre, especialidad: doctoresMock[1].especialidad },
+    paciente: { nombre: pacientesMock[1].nombre },
+  },
+  {
+    id: 3,
+    paciente_id: 3,
+    doctor_id: 1,
+    fecha: new Date().toISOString(),
+    hora_inicio: '11:30:00',
+    hora_fin: '12:00:00',
+    motivo: 'Seguimiento cardiológico',
+    estado: 'completada',
+    doctor: { nombre: doctoresMock[0].nombre, especialidad: doctoresMock[0].especialidad },
+    paciente: { nombre: pacientesMock[2].nombre },
+  },
+  {
+    id: 4,
+    paciente_id: 1,
+    doctor_id: 3,
+    fecha: new Date().toISOString(),
+    hora_inicio: '14:00:00',
+    hora_fin: '14:30:00',
+    motivo: 'Chequeo anual',
+    estado: 'cancelada',
+    doctor: { nombre: doctoresMock[2].nombre, especialidad: doctoresMock[2].especialidad },
+    paciente: { nombre: pacientesMock[0].nombre },
+  },
+]
