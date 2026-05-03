@@ -192,7 +192,7 @@ Para conectar con el backend real:
 
 ## Desarrollador
 
-**Rol:** Desarrollador Web  
+**Rol:** Desarrollador Web - Zeus Samael Aguirre Martinez 
 **Proyecto:** MediSync — Plataforma de Gestión Médica Digital  
 **Materia:** Diseño y Arquitectura de Software  
-**Universidad:** Tecmilenio — 2025
+**Universidad:** Tecmilenio — 2026
