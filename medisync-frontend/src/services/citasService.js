@@ -8,6 +8,12 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true'
 // Copia mutable del array mock
 let mockData = [...citasMock]
 
+/**
+ * Obtiene citas. Acepta filtros opcionales: { fecha?, doctor_id? }
+ * - Sin filtros        → GET /citas/
+ * - Con fecha=hoy      → GET /citas/hoy
+ * - Con doctor_id      → GET /citas/{doctor_id}/citas
+ */
 export async function getCitas(filtros = {}) {
   if (USE_MOCK) {
     let resultado = [...mockData]
@@ -20,10 +26,36 @@ export async function getCitas(filtros = {}) {
     }
     return Promise.resolve(resultado)
   }
-  const res = await api.get('/citas/', { params: filtros })
-  return res.data
+
+  try {
+    // Filtro por doctor: GET /citas/{doctor_id}/citas
+    if (filtros.doctor_id) {
+      const res = await api.get(`/citas/${filtros.doctor_id}/citas`)
+      return res.data
+    }
+
+    // Filtro por fecha de hoy: GET /citas/hoy
+    const hoy = new Date().toISOString().substring(0, 10)
+    if (filtros.fecha && filtros.fecha === hoy) {
+      const res = await api.get('/citas/hoy')
+      return res.data
+    }
+
+    // Sin filtros: GET /citas/
+    const res = await api.get('/citas/')
+    return res.data
+  } catch (err) {
+    // El backend retorna 404 cuando no hay citas — lo tratamos como lista vacía
+    if (err.message?.includes('404') || err.response?.status === 404) {
+      return []
+    }
+    throw err
+  }
 }
 
+/**
+ * Obtiene una cita por ID: GET /citas/{id}
+ */
 export async function getCitaById(id) {
   if (USE_MOCK) {
     const cita = mockData.find((c) => c.id === Number(id))
@@ -48,6 +80,10 @@ export async function getCitaById(id) {
   return res.data
 }
 
+/**
+ * Crea una nueva cita: POST /citas/
+ * El backend espera: { paciente_id, doctor_id, fecha (ISO datetime), hora_inicio, hora_fin, motivo }
+ */
 export async function createCita(datos) {
   if (USE_MOCK) {
     const nueva = {
@@ -60,10 +96,23 @@ export async function createCita(datos) {
     mockData.push(nueva)
     return Promise.resolve({ ...nueva })
   }
-  const res = await api.post('/citas/', { ...datos, estado: 'agendada' })
+
+  // El backend espera fecha como ISO datetime completo
+  const payload = {
+    ...datos,
+    fecha: datos.fecha.includes('T') ? datos.fecha : `${datos.fecha}T00:00:00`,
+    hora_inicio: datos.hora_inicio.length === 5 ? `${datos.hora_inicio}:00` : datos.hora_inicio,
+    hora_fin: datos.hora_fin.length === 5 ? `${datos.hora_fin}:00` : datos.hora_fin,
+  }
+
+  const res = await api.post('/citas/', payload)
   return res.data
 }
 
+/**
+ * Modifica una cita: PUT /citas/{id}/editar
+ * El backend espera: { fecha, hora_inicio, hora_fin, motivo }
+ */
 export async function updateCita(id, datos) {
   if (USE_MOCK) {
     const idx = mockData.findIndex((c) => c.id === Number(id))
@@ -71,10 +120,42 @@ export async function updateCita(id, datos) {
     mockData[idx] = { ...mockData[idx], ...datos }
     return Promise.resolve({ ...mockData[idx] })
   }
-  const res = await api.put(`/citas/${id}`, datos)
+
+  const payload = {
+    fecha: datos.fecha.includes('T') ? datos.fecha : `${datos.fecha}T00:00:00`,
+    hora_inicio: datos.hora_inicio.length === 5 ? `${datos.hora_inicio}:00` : datos.hora_inicio,
+    hora_fin: datos.hora_fin.length === 5 ? `${datos.hora_fin}:00` : datos.hora_fin,
+    motivo: datos.motivo,
+  }
+
+  const res = await api.put(`/citas/${id}/editar`, payload)
   return res.data
 }
 
+/**
+ * Cancela una cita: PATCH /citas/{id}/cancelar
+ */
 export async function cancelarCita(id) {
-  return updateCita(id, { estado: 'cancelada' })
+  if (USE_MOCK) {
+    const idx = mockData.findIndex((c) => c.id === Number(id))
+    if (idx === -1) throw new Error('La cita no existe')
+    mockData[idx] = { ...mockData[idx], estado: 'cancelada' }
+    return Promise.resolve({ ...mockData[idx] })
+  }
+  const res = await api.patch(`/citas/${id}/cancelar`)
+  return res.data
+}
+
+/**
+ * Cambia el estado de una cita: PATCH /citas/{id}/estado
+ */
+export async function cambiarEstadoCita(id, estado) {
+  if (USE_MOCK) {
+    const idx = mockData.findIndex((c) => c.id === Number(id))
+    if (idx === -1) throw new Error('La cita no existe')
+    mockData[idx] = { ...mockData[idx], estado }
+    return Promise.resolve({ ...mockData[idx] })
+  }
+  const res = await api.patch(`/citas/${id}/estado`, { estado })
+  return res.data
 }

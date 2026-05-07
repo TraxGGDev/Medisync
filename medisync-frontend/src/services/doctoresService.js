@@ -7,8 +7,16 @@ export async function getDoctores() {
   if (USE_MOCK) {
     return Promise.resolve([...doctoresMock])
   }
-  const res = await api.get('/doctores/')
-  return res.data
+  try {
+    const res = await api.get('/doctores/')
+    return res.data
+  } catch (err) {
+    // El backend retorna 404 cuando no hay doctores — lo tratamos como lista vacía
+    if (err.message?.includes('404') || err.response?.status === 404) {
+      return []
+    }
+    throw err
+  }
 }
 
 export async function getDoctorById(id) {

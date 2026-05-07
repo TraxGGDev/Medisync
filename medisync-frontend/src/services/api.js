@@ -8,9 +8,13 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Preservamos el objeto error original con response.status para que
+    // los servicios puedan detectar 404 y tratarlo como lista vacía
     const mensaje =
       error.response?.data?.detail || 'Error de conexión con el servidor'
-    return Promise.reject(new Error(mensaje))
+    const err = new Error(mensaje)
+    err.response = error.response  // preservar status code
+    return Promise.reject(err)
   }
 )
 
