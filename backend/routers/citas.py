@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
 from datetime import datetime
@@ -62,7 +63,7 @@ def obtener_citas(db: Session=Depends(get_db)):
 @router.get("/hoy", response_model=list[schemas.CitaResponse])
 def obtener_citas_hoy(db: Session=Depends(get_db)):
     fecha_hoy = datetime.now().date()
-    citas = db.query(models.Cita).filter(models.Cita.fecha == fecha_hoy).all()
+    citas = db.query(models.Cita).filter(func.date(models.Cita.fecha) == fecha_hoy).all()
     
     if not citas:
         raise HTTPException(status_code=404, detail="No hay citas el dia de hoy")
