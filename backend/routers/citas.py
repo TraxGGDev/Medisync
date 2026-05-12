@@ -105,9 +105,10 @@ def modificar_cita(cita_id:int, cita_actualizada: schemas.CitaUpdate, db: Sessio
     
     doctor = db.query(models.Doctor).filter(models.Doctor.id == cita_db.doctor_id).first()
     
+    hora_inicio = cita_actualizada.hora_inicio.replace(tzinfo=None)
+    hora_fin = cita_actualizada.hora_fin.replace(tzinfo=None)
     
-    
-    if not (cita_actualizada.hora_inicio >= doctor.horario_inicio and cita_actualizada.hora_fin <= doctor.horario_fin):
+    if not (hora_inicio >= doctor.horario_inicio and hora_fin <= doctor.horario_fin):
         raise HTTPException(status_code=400, detail="Horario no disponible para el doctor")
     
     
