@@ -25,7 +25,10 @@ def crear_cita(cita: schemas.CitaCreate, db: Session=Depends(get_db)):
     if not paciente:
         raise HTTPException(status_code=404, detail="El paciente no existe")
     
-    if not (cita.hora_inicio >= doctor.horario_inicio and cita.hora_fin <= doctor.horario_fin):
+    hora_inicio = cita.hora_inicio.replace(tzinfo=None)
+    hora_fin = cita.hora_fin.replace(tzinfo=None)
+    
+    if not (hora_inicio >= doctor.horario_inicio and hora_fin <= doctor.horario_fin):
         raise HTTPException(status_code=400, detail="Horario no disponible para el doctor")
     
     nueva_cita = models.Cita(
