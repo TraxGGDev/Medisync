@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import engine, SessionLocal
 import models as models
 import schemas as schemas
-from routers import doctores, pacientes, citas
+from routers import doctores, pacientes, citas, auth
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -21,3 +21,4 @@ app.add_middleware(
 app.include_router(doctores.router)
 app.include_router(pacientes.router)
 app.include_router(citas.router)
+app.include_router(auth.router)

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime, time
-from typing import Literal
+from typing import Literal, Optional
 
 class DoctorCreate(BaseModel):
     nombre:str
@@ -64,6 +64,7 @@ class CitaResponse(BaseModel):
     estado:str
     doctor: DoctorMini
     paciente: PacienteMini
+    fecha_creacion: datetime
     
     class Config:
         from_attributes=True
@@ -73,7 +74,33 @@ class CitaUpdate(BaseModel):
     hora_inicio: time
     hora_fin: time
     motivo: str
+    
+
+class PacienteUpdate(BaseModel):
+    nombre: str
+    telefono: str 
         
     
 class CitaStatusUpdate(BaseModel):
     estado: Literal["agendada", "cancelada", "completada"]
+    
+    
+class UsuarioCreate(BaseModel):
+    email:str
+    password:str
+    rol:str
+    
+class UsuarioResponse(BaseModel):
+    id:int
+    email: str
+    rol: str
+    paciente_id: Optional[int] = None
+    
+    class Config:
+        from_attributes=True
+
+class LoginRequest(BaseModel):
+    
+    email: str
+    password: str
+    

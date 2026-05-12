@@ -32,6 +32,18 @@ def obtener_pacientes(db: Session=Depends(get_db)):
     
     return pacientes
 
+#buscar pacientes
+@router.get("/buscar", response_model=list[schemas.PacienteResponse])
+def buscar_paciente(nombre: str, db: Session = Depends(get_db)):
+    
+    pacientes = db.query(models.Paciente).filter(models.Paciente.nombre.ilike(f"%{nombre}%")).all()
+    
+    if not pacientes:
+        raise HTTPException(status_code=404, detail="No se encontraron pacientes")
+    
+    return pacientes
+
+
 #obtener paciente por id
 @router.get("/{paciente_id}", response_model=schemas.PacienteResponse)
 def obtener_paciente(paciente_id: int, db: Session=Depends(get_db)):
@@ -42,3 +54,33 @@ def obtener_paciente(paciente_id: int, db: Session=Depends(get_db)):
         raise HTTPException(status_code=404, detail="No se encontró el paciente")
     
     return paciente
+
+#Editar paciente
+@router.put("/{paciente_id}/editar", response_model=schemas.PacienteResponse)
+def editar_paciente(paciente_id: int, paciente_actualizado: schemas.PacienteUpdate, db: Session=Depends(get_db)):
+    
+    #verificamos que el paciente exista
+    paciente_db = db.query(models.Paciente).filter(models.Paciente.id == paciente_id).first()
+    
+    if not paciente_db:
+        raise HTTPException(status_code=404, detail="El paciente no existe en la base de datos")
+    
+    paciente_db.nombre = paciente_actualizado.nombre
+    paciente_db.telefono = paciente_actualizado.telefono
+    
+    db.commit()
+    db.refresh(paciente_db)
+    return paciente_db
+
+#lista de citas filtrado por paciente
+@router.get("/{paciente_id}/citas", response_model=list[schemas.CitaResponse])
+def obtener_cita_paciente(paciente_id:int, db:Session=Depends(get_db)):
+    
+    paciente_db = db.query(models.Paciente).filter(models.Paciente.id == paciente_id).first()
+    
+    if not paciente_db:
+        raise HTTPException(status_code=404, detail="El paciente no existe")
+    
+    citas_paciente = db.query(models.Cita).filter(models.Cita.paciente_id == paciente_id).all()
+    
+    return citas_paciente

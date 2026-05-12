@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
-from datetime import datetime
+from datetime import datetime, date
 import models
 import schemas
 
@@ -31,6 +31,16 @@ def crear_cita(cita: schemas.CitaCreate, db: Session=Depends(get_db)):
     
     if not (hora_inicio >= doctor.horario_inicio and hora_fin <= doctor.horario_fin):
         raise HTTPException(status_code=400, detail="Horario no disponible para el doctor")
+    
+    cita_existente = db.query(models.Cita).filter(
+        models.Cita.doctor_id == cita.doctor_id,
+        models.Cita.fecha == cita.fecha,
+        models.Cita.hora_inicio < cita.hora_fin,
+        models.Cita.hora_fin > cita.hora_inicio
+    ).first()
+    
+    if cita_existente:
+        raise HTTPException(status_code=400, detail="El doctor ya tiene una cita en ese horario")
     
     nueva_cita = models.Cita(
         paciente_id = cita.paciente_id,
@@ -67,6 +77,18 @@ def obtener_citas_hoy(db: Session=Depends(get_db)):
     
     if not citas:
         raise HTTPException(status_code=404, detail="No hay citas el dia de hoy")
+    
+    return citas
+
+#obtener citas por fechas
+@router.get("/fecha", response_model=list[schemas.CitaResponse])
+def obtener_cita_por_fecha(fecha:date,db:Session=Depends(get_db)):
+    
+    
+    citas = db.query(models.Cita).filter(func.date(models.Cita.fecha) ==fecha ).all()
+    
+    if not citas:
+        raise HTTPException(status_code=404, detail="No hay citas en esta fecha")
     
     return citas
 
@@ -115,6 +137,17 @@ def modificar_cita(cita_id:int, cita_actualizada: schemas.CitaUpdate, db: Sessio
     if not (hora_inicio >= doctor.horario_inicio and hora_fin <= doctor.horario_fin):
         raise HTTPException(status_code=400, detail="Horario no disponible para el doctor")
     
+    cita_existente = db.query(models.Cita).filter(
+        models.Cita.doctor_id == cita_db.doctor_id,
+        models.Cita.fecha == cita_actualizada.fecha,
+        models.Cita.hora_inicio < cita_actualizada.hora_fin,
+        models.Cita.hora_fin > cita_actualizada.hora_inicio,
+        models.Cita.id != cita_id
+    ).first()
+    
+    if cita_existente:
+        raise HTTPException(status_code=400, detail="El doctor ya tiene una cita en ese horario")
+    
     
     cita_db.fecha = cita_actualizada.fecha
     cita_db.hora_inicio = cita_actualizada.hora_inicio
@@ -139,6 +172,7 @@ def obtener_cita_doctor(doctor_id:int, db: Session=Depends(get_db)):
     citas= db.query(models.Cita).filter(models.Cita.doctor_id == doctor_id).all()
     
     return citas
+
 
 #modificar el status de cada cita
 @router.patch("/{cita_id}/estado", response_model= schemas.CitaResponse)
