@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY no está definida en las variables de entorno")
 ALGORITHM = "HS256"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

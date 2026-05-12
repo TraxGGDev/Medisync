@@ -9,9 +9,7 @@ export function AgendaDoctorPage() {
   const { data: doctores, loading: loadingDoctores, cargar: cargarDoctores } = useDoctores()
   const navigate = useNavigate()
 
-  const hoy = new Date().toISOString().substring(0, 10)
   const [doctorId, setDoctorId] = useState('')
-  const [fecha, setFecha] = useState(hoy)
   const [citas, setCitas] = useState([])
   const [loadingCitas, setLoadingCitas] = useState(false)
   const [errorCitas, setErrorCitas] = useState(null)
@@ -22,20 +20,36 @@ export function AgendaDoctorPage() {
 
   useEffect(() => {
     if (!doctorId) return
+
+    let cancelled = false
+
     setLoadingCitas(true)
     setErrorCitas(null)
-    getCitas({ doctor_id: doctorId, fecha })
+
+    // Backend: GET /citas/{doctor_id}/citas
+    getCitas({ doctor_id: doctorId })
+      .then((data) => { if (!cancelled) setCitas(data) })
+      .catch((err) => { if (!cancelled) setErrorCitas(err.message) })
+      .finally(() => { if (!cancelled) setLoadingCitas(false) })
+
+    return () => { cancelled = true }
+  }, [doctorId])
+
+  const reintentarCitas = () => {
+    if (!doctorId) return
+    setLoadingCitas(true)
+    setErrorCitas(null)
+    getCitas({ doctor_id: doctorId })
       .then(setCitas)
       .catch((err) => setErrorCitas(err.message))
       .finally(() => setLoadingCitas(false))
-  }, [doctorId, fecha])
+  }
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Mi Agenda</h1>
 
       <div className="flex flex-wrap gap-4 mb-6">
-        {/* Selector de doctor */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
           {loadingDoctores ? (
@@ -55,17 +69,6 @@ export function AgendaDoctorPage() {
             </select>
           )}
         </div>
-
-        {/* Selector de fecha */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-          <input
-            type="date"
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
       </div>
 
       {!doctorId ? (
@@ -74,13 +77,7 @@ export function AgendaDoctorPage() {
         <div className="text-center py-8">
           <p className="text-red-600 text-sm mb-3">{errorCitas}</p>
           <button
-            onClick={() => {
-              setLoadingCitas(true)
-              getCitas({ doctor_id: doctorId, fecha })
-                .then(setCitas)
-                .catch((err) => setErrorCitas(err.message))
-                .finally(() => setLoadingCitas(false))
-            }}
+            onClick={reintentarCitas}
             className="text-blue-600 text-sm underline hover:text-blue-800"
           >
             Reintentar
@@ -91,7 +88,7 @@ export function AgendaDoctorPage() {
           citas={citas}
           loading={loadingCitas}
           onRowClick={(id) => navigate(`/citas/${id}`)}
-          emptyMessage="No hay citas para este doctor en la fecha seleccionada."
+          emptyMessage="No hay citas para este doctor."
         />
       )}
     </div>

@@ -17,5 +17,13 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Regla experimental que genera falsos positivos en patrones estándar
+      // de carga de datos asíncrona dentro de useEffect
+      'react-hooks/set-state-in-effect': 'off',
+      // Los archivos de contexto exportan tanto el objeto Context como el Provider —
+      // esto es un patrón estándar de React que no afecta el hot-reload
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    },
   },
 ])

@@ -1,6 +1,5 @@
-import { createContext, useContext, useState } from 'react'
-
-const AppContext = createContext(null)
+import { useState } from 'react'
+import { AppContext } from './context'
 
 export function AppProvider({ children }) {
   const [usuarioActivo] = useState({ nombre: 'Recepcionista', rol: 'recepcionista' })
@@ -10,10 +9,4 @@ export function AppProvider({ children }) {
       {children}
     </AppContext.Provider>
   )
-}
-
-export function useAppContext() {
-  const ctx = useContext(AppContext)
-  if (!ctx) throw new Error('useAppContext debe usarse dentro de AppProvider')
-  return ctx
 }

@@ -9,9 +9,10 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK_API === 'true'
 let mockData = [...citasMock]
 
 /**
- * Obtiene citas. Acepta filtros opcionales: { fecha?, doctor_id? }
+ * Obtiene citas con filtros opcionales: { fecha?, doctor_id? }
  * - Sin filtros        → GET /citas/
  * - Con fecha=hoy      → GET /citas/hoy
+ * - Con fecha!=hoy     → GET /citas/fecha?fecha=YYYY-MM-DD
  * - Con doctor_id      → GET /citas/{doctor_id}/citas
  */
 export async function getCitas(filtros = {}) {
@@ -34,10 +35,17 @@ export async function getCitas(filtros = {}) {
       return res.data
     }
 
-    // Filtro por fecha de hoy: GET /citas/hoy
     const hoy = new Date().toISOString().substring(0, 10)
+
+    // Filtro por fecha de hoy: GET /citas/hoy
     if (filtros.fecha && filtros.fecha === hoy) {
       const res = await api.get('/citas/hoy')
+      return res.data
+    }
+
+    // Filtro por otra fecha: GET /citas/fecha?fecha=YYYY-MM-DD
+    if (filtros.fecha) {
+      const res = await api.get('/citas/fecha', { params: { fecha: filtros.fecha } })
       return res.data
     }
 
@@ -46,9 +54,7 @@ export async function getCitas(filtros = {}) {
     return res.data
   } catch (err) {
     // El backend retorna 404 cuando no hay citas — lo tratamos como lista vacía
-    if (err.message?.includes('404') || err.response?.status === 404) {
-      return []
-    }
+    if (err.response?.status === 404) return []
     throw err
   }
 }
@@ -65,11 +71,7 @@ export async function getCitaById(id) {
     return Promise.resolve({
       ...cita,
       paciente: pacienteCompleto
-        ? {
-            nombre: pacienteCompleto.nombre,
-            telefono: pacienteCompleto.telefono,
-            numero_seguro: pacienteCompleto.numero_seguro,
-          }
+        ? { nombre: pacienteCompleto.nombre, telefono: pacienteCompleto.telefono, numero_seguro: pacienteCompleto.numero_seguro }
         : cita.paciente,
       doctor: doctorCompleto
         ? { nombre: doctorCompleto.nombre, especialidad: doctorCompleto.especialidad }
@@ -82,7 +84,6 @@ export async function getCitaById(id) {
 
 /**
  * Crea una nueva cita: POST /citas/
- * El backend espera: { paciente_id, doctor_id, fecha (ISO datetime), hora_inicio, hora_fin, motivo }
  */
 export async function createCita(datos) {
   if (USE_MOCK) {
@@ -90,6 +91,7 @@ export async function createCita(datos) {
       id: mockData.length + 1,
       ...datos,
       estado: 'agendada',
+      fecha_creacion: new Date().toISOString(),
       doctor: { nombre: 'Doctor Mock', especialidad: 'Especialidad Mock' },
       paciente: { nombre: 'Paciente Mock' },
     }
@@ -97,7 +99,6 @@ export async function createCita(datos) {
     return Promise.resolve({ ...nueva })
   }
 
-  // El backend espera fecha como ISO datetime completo
   const payload = {
     ...datos,
     fecha: datos.fecha.includes('T') ? datos.fecha : `${datos.fecha}T00:00:00`,
@@ -111,7 +112,6 @@ export async function createCita(datos) {
 
 /**
  * Modifica una cita: PUT /citas/{id}/editar
- * El backend espera: { fecha, hora_inicio, hora_fin, motivo }
  */
 export async function updateCita(id, datos) {
   if (USE_MOCK) {

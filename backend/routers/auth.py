@@ -23,7 +23,7 @@ def registrar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_
         email=usuario.email,
         password=hashear_password(usuario.password),
         rol=usuario.rol,
-        paciente_id=usuario.paciente_id if hasattr(usuario, 'paciente_id') else None
+        paciente_id=None
     )
     
     db.add(nuevo_usuario)

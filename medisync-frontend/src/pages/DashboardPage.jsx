@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCitas } from '../hooks/useCitas'
 import { CitaTable } from '../components/citas/CitaTable'
@@ -7,8 +7,8 @@ export function DashboardPage() {
   const { data, loading, error, cargar } = useCitas()
   const navigate = useNavigate()
 
-  // Obtener fecha de hoy en formato ISO YYYY-MM-DD
-  const hoy = new Date().toISOString().substring(0, 10)
+  // Obtener fecha de hoy en formato ISO YYYY-MM-DD — estable durante el ciclo de vida
+  const hoy = useMemo(() => new Date().toISOString().substring(0, 10), [])
 
   useEffect(() => {
     cargar({ fecha: hoy })

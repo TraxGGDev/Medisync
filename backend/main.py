@@ -12,9 +12,9 @@ app = FastAPI(title="API Medisync", version="1.0")
 # --- CONFIGURACIÓN CORS---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # url del front
-    allow_credentials=True,
-    allow_methods=["*"], # Permite GET, POST, PATCH, DELETE
+    allow_origins=["*"],  # En producción reemplazar con la URL exacta del frontend
+    allow_credentials=False,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 

@@ -1,4 +1,4 @@
-import { useAppContext } from '../../context/AppContext'
+import { useAppContext } from '../../context/useAppContext'
 import { formatFecha } from '../../lib/utils'
 
 export function Header() {
