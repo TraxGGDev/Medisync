@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime, time
 from typing import Literal, Optional
 
@@ -87,7 +87,7 @@ class CitaStatusUpdate(BaseModel):
     
 class UsuarioCreate(BaseModel):
     email:str
-    password:str
+    password:str = Field(max_length=72)
     rol:str
     
 class UsuarioResponse(BaseModel):
