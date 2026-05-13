@@ -45,14 +45,6 @@ export function CitaDetalle({ cita, onCancelConfirm, onEstadoChange }) {
               <dt className="text-sm text-gray-500 w-32">Nombre</dt>
               <dd className="text-sm font-medium text-gray-900">{cita.paciente?.nombre}</dd>
             </div>
-            <div className="flex gap-4">
-              <dt className="text-sm text-gray-500 w-32">Teléfono</dt>
-              <dd className="text-sm text-gray-700">{cita.paciente?.telefono}</dd>
-            </div>
-            <div className="flex gap-4">
-              <dt className="text-sm text-gray-500 w-32">N° Seguro</dt>
-              <dd className="text-sm text-gray-700">{cita.paciente?.numero_seguro}</dd>
-            </div>
           </dl>
         </div>
 
