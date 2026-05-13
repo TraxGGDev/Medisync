@@ -3,15 +3,29 @@ import { useNavigate } from 'react-router-dom'
 import { StatusBadge } from '../ui/StatusBadge'
 import { CancelDialog } from './CancelDialog'
 import { isCitaEditable, formatFecha, formatHora } from '../../lib/utils'
+import { cambiarEstadoCita } from '../../services/citasService'
 
-export function CitaDetalle({ cita, onCancelConfirm }) {
+export function CitaDetalle({ cita, onCancelConfirm, onEstadoChange }) {
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [cambiandoEstado, setCambiandoEstado] = useState(false)
   const navigate = useNavigate()
   const editable = isCitaEditable(cita)
 
   const handleConfirmCancel = async () => {
     setDialogOpen(false)
     await onCancelConfirm?.(cita.id)
+  }
+
+  const handleCompletada = async () => {
+    setCambiandoEstado(true)
+    try {
+      const actualizada = await cambiarEstadoCita(cita.id, 'completada')
+      onEstadoChange?.(actualizada)
+    } catch (err) {
+      alert(`Error: ${err.message}`)
+    } finally {
+      setCambiandoEstado(false)
+    }
   }
 
   return (
@@ -95,6 +109,13 @@ export function CitaDetalle({ cita, onCancelConfirm }) {
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
             Editar Cita
+          </button>
+          <button
+            onClick={handleCompletada}
+            disabled={cambiandoEstado}
+            className="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+          >
+            {cambiandoEstado ? 'Guardando...' : 'Marcar Completada'}
           </button>
         </div>
       )}

@@ -52,7 +52,11 @@ export function CitaDetallePage() {
         ← Volver
       </button>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Detalle de Cita #{id}</h1>
-      <CitaDetalle cita={cita} onCancelConfirm={handleCancelConfirm} />
+      <CitaDetalle
+        cita={cita}
+        onCancelConfirm={handleCancelConfirm}
+        onEstadoChange={setCita}
+      />
     </div>
   )
 }

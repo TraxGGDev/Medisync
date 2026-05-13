@@ -6,6 +6,7 @@ import { useAppContext } from './context/useAppContext'
 import { DashboardPage } from './pages/DashboardPage'
 import { PacientesListPage } from './pages/PacientesListPage'
 import { PacienteNuevoPage } from './pages/PacienteNuevoPage'
+import { PacienteDetallePage } from './pages/PacienteDetallePage'
 import { DoctoresPage } from './pages/DoctoresPage'
 import { CitaNuevaPage } from './pages/CitaNuevaPage'
 import { CitaDetallePage } from './pages/CitaDetallePage'
@@ -40,6 +41,7 @@ function AppRoutes() {
         <Route index element={<DashboardPage />} />
         <Route path="pacientes" element={<PacientesListPage />} />
         <Route path="pacientes/nuevo" element={<PacienteNuevoPage />} />
+        <Route path="pacientes/:id" element={<PacienteDetallePage />} />
         <Route path="doctores" element={<DoctoresPage />} />
         <Route path="citas/nueva" element={<CitaNuevaPage />} />
         <Route path="citas/:id" element={<CitaDetallePage />} />
