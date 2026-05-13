@@ -1,19 +1,47 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { usePacientes } from '../hooks/usePacientes'
+import { getPacientes, buscarPacientes } from '../services/pacientesService'
 import { PacienteTable } from '../components/pacientes/PacienteTable'
-import { filtrarPacientes } from '../lib/utils'
 
 export function PacientesListPage() {
-  const { data, loading, error, cargar } = usePacientes()
+  const [pacientes, setPacientes] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
 
-  useEffect(() => {
-    cargar()
-  }, [cargar])
+  // Carga inicial — todos los pacientes
+  const cargarTodos = useCallback(() => {
+    setLoading(true)
+    setError(null)
+    getPacientes()
+      .then(setPacientes)
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [])
 
-  const pacientesFiltrados = filtrarPacientes(data, query)
+  useEffect(() => {
+    cargarTodos()
+  }, [cargarTodos])
+
+  // Búsqueda con debounce de 400ms
+  useEffect(() => {
+    if (!query.trim()) {
+      cargarTodos()
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setLoading(true)
+      setError(null)
+      buscarPacientes(query.trim())
+        .then(setPacientes)
+        .catch((err) => setError(err.message))
+        .finally(() => setLoading(false))
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [query, cargarTodos])
 
   return (
     <div>
@@ -30,7 +58,7 @@ export function PacientesListPage() {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="🔍 Buscar por nombre o teléfono..."
+          placeholder="🔍 Buscar por nombre..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -41,7 +69,7 @@ export function PacientesListPage() {
         <div className="text-center py-8">
           <p className="text-red-600 text-sm mb-3">{error}</p>
           <button
-            onClick={cargar}
+            onClick={cargarTodos}
             className="text-blue-600 text-sm underline hover:text-blue-800"
           >
             Reintentar
@@ -49,7 +77,7 @@ export function PacientesListPage() {
         </div>
       ) : (
         <PacienteTable
-          pacientes={pacientesFiltrados}
+          pacientes={pacientes}
           loading={loading}
           onRowClick={(id) => navigate(`/pacientes/${id}`)}
         />
