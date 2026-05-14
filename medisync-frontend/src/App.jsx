@@ -14,12 +14,24 @@ import { CitaEditarPage } from './pages/CitaEditarPage'
 import { AgendaDoctorPage } from './pages/AgendaDoctorPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { MisCitasPage } from './pages/MisCitasPage'
 
-// Protege rutas privadas — redirige a /login si no hay sesión
-function RutaPrivada({ children }) {
+// Ruta privada para clínica (recepcionista/doctor)
+function RutaClinica({ children }) {
   const { usuarioActivo, cargando } = useAppContext()
   if (cargando) return null
-  return usuarioActivo ? children : <Navigate to="/login" replace />
+  if (!usuarioActivo) return <Navigate to="/login" replace />
+  if (usuarioActivo.rol === 'paciente') return <Navigate to="/mis-citas" replace />
+  return children
+}
+
+// Ruta privada para paciente
+function RutaPaciente({ children }) {
+  const { usuarioActivo, cargando } = useAppContext()
+  if (cargando) return null
+  if (!usuarioActivo) return <Navigate to="/login" replace />
+  if (usuarioActivo.rol !== 'paciente') return <Navigate to="/" replace />
+  return children
 }
 
 function AppRoutes() {
@@ -29,13 +41,31 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Rutas privadas */}
+      {/* Vista paciente */}
+      <Route
+        path="/mis-citas"
+        element={
+          <RutaPaciente>
+            <MisCitasPage />
+          </RutaPaciente>
+        }
+      />
+      <Route
+        path="/mis-citas/:id"
+        element={
+          <RutaPaciente>
+            <MisCitasPage />
+          </RutaPaciente>
+        }
+      />
+
+      {/* Rutas clínica */}
       <Route
         path="/"
         element={
-          <RutaPrivada>
+          <RutaClinica>
             <AppLayout />
-          </RutaPrivada>
+          </RutaClinica>
         }
       >
         <Route index element={<DashboardPage />} />

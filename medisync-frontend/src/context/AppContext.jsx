@@ -10,22 +10,29 @@ export function AppProvider({ children }) {
     const token = obtenerToken()
     const rol = localStorage.getItem('medisync_rol')
     const nombre = localStorage.getItem('medisync_nombre') || 'Usuario'
+    const pacienteId = localStorage.getItem('medisync_paciente_id')
     if (token) {
-      setUsuarioActivo({ nombre, rol })
+      setUsuarioActivo({ nombre, rol, pacienteId })
     }
     setCargando(false)
   }, [])
 
-  const iniciarSesion = (token, rol, nombre = 'Usuario') => {
+  const iniciarSesion = (token, rol, nombre = 'Usuario', pacienteId = null) => {
     localStorage.setItem('medisync_token', token)
     localStorage.setItem('medisync_rol', rol)
     localStorage.setItem('medisync_nombre', nombre)
-    setUsuarioActivo({ nombre, rol })
+    if (pacienteId) {
+      localStorage.setItem('medisync_paciente_id', pacienteId)
+    } else {
+      localStorage.removeItem('medisync_paciente_id')
+    }
+    setUsuarioActivo({ nombre, rol, pacienteId })
   }
 
   const cerrarSesionActiva = () => {
     cerrarSesion()
     localStorage.removeItem('medisync_nombre')
+    localStorage.removeItem('medisync_paciente_id')
     setUsuarioActivo(null)
   }
 

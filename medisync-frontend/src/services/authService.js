@@ -23,11 +23,13 @@ export async function login(email, password) {
 /**
  * Registro: POST /auth/register
  */
-export async function register(email, password, rol) {
+export async function register(email, password, rol, paciente_id = null) {
   if (USE_MOCK) {
     return Promise.resolve({ id: 1, email, rol })
   }
-  const res = await api.post('/auth/register', { email, password, rol })
+  const payload = { email, password, rol }
+  if (paciente_id) payload.paciente_id = paciente_id
+  const res = await api.post('/auth/register', payload)
   return res.data
 }
 

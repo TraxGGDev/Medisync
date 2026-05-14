@@ -17,8 +17,18 @@ export function LoginPage() {
     setLoading(true)
     try {
       const data = await login(email, password)
-      iniciarSesion(data.access_token, data.rol, email)
-      navigate('/')
+
+      // Recuperar paciente_id guardado durante el registro si existe
+      const pacienteId = localStorage.getItem('medisync_registro_paciente_id') || null
+
+      iniciarSesion(data.access_token, data.rol, email, pacienteId)
+
+      // Redirigir según rol
+      if (data.rol === 'paciente') {
+        navigate('/mis-citas')
+      } else {
+        navigate('/')
+      }
     } catch (err) {
       setError(err.message || 'Credenciales incorrectas')
     } finally {

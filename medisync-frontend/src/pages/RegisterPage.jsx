@@ -7,15 +7,26 @@ export function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rol, setRol] = useState('recepcionista')
+  const [pacienteId, setPacienteId] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
+
+    if (rol === 'paciente' && !pacienteId) {
+      setError('Debes ingresar tu número de paciente')
+      return
+    }
+
     setLoading(true)
     try {
-      await register(email, password, rol)
+      await register(email, password, rol, rol === 'paciente' ? Number(pacienteId) : null)
+      // Si es paciente, guardamos el paciente_id para usarlo después del login
+      if (rol === 'paciente') {
+        localStorage.setItem('medisync_registro_paciente_id', pacienteId)
+      }
       navigate('/login')
     } catch (err) {
       setError(err.message || 'Error al registrar usuario')
@@ -69,17 +80,37 @@ export function RegisterPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rol
+              Tipo de cuenta
             </label>
             <select
               value={rol}
-              onChange={(e) => setRol(e.target.value)}
+              onChange={(e) => { setRol(e.target.value); setPacienteId('') }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="recepcionista">Recepcionista</option>
-              <option value="doctor">Doctor</option>
+              <option value="recepcionista">Personal de clínica (Recepcionista)</option>
+              <option value="doctor">Personal de clínica (Doctor)</option>
+              <option value="paciente">Paciente</option>
             </select>
           </div>
+
+          {rol === 'paciente' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Número de paciente <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                value={pacienteId}
+                onChange={(e) => setPacienteId(e.target.value)}
+                required
+                placeholder="ID asignado por la clínica"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Este número te lo proporciona la clínica al registrarte como paciente.
+              </p>
+            </div>
+          )}
 
           <button
             type="submit"
