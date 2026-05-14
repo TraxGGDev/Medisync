@@ -37,7 +37,7 @@ def crear_cita(cita: schemas.CitaCreate, db: Session=Depends(get_db)):
         models.Cita.fecha == cita.fecha,
         models.Cita.hora_inicio < cita.hora_fin,
         models.Cita.hora_fin > cita.hora_inicio,
-        models.Cita.estado.in_(["agendada", "completada"])
+        models.Cita.estado == "agendada"
     ).first()
     
     if cita_existente:
