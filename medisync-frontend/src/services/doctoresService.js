@@ -28,3 +28,11 @@ export async function getDoctorById(id) {
   const res = await api.get(`/doctores/${id}`)
   return res.data
 }
+
+export async function createDoctor(datos) {
+  if (USE_MOCK) {
+    return Promise.resolve({ id: Date.now(), ...datos })
+  }
+  const res = await api.post('/doctores/', datos)
+  return res.data
+}

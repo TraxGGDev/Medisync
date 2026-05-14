@@ -1,18 +1,19 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { CalendarDays, Users, Stethoscope, CalendarCheck } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { useAppContext } from '../../context/useAppContext'
 
-const navClinica = [
-  { to: '/', label: 'Agenda', icon: CalendarDays, end: true },
+const navItems = [
+  { to: '/', label: 'Citas del Día', icon: CalendarDays, end: true },
   { to: '/pacientes', label: 'Pacientes', icon: Users },
   { to: '/doctores', label: 'Médicos', icon: Stethoscope },
-  { to: '/agenda-doctor', label: 'Mi Agenda', icon: CalendarCheck },
+  { to: '/agenda-doctor', label: 'Agenda por Doctor', icon: CalendarCheck },
 ]
 
 export function Sidebar() {
   const { usuarioActivo } = useAppContext()
-  const navItems = navClinica
+  const navigate = useNavigate()
+  const esRecepcionista = usuarioActivo?.rol === 'recepcionista'
 
   return (
     <aside className="w-56 min-h-screen bg-white border-r border-gray-200 flex flex-col">
@@ -42,6 +43,18 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Botón agregar doctor — solo recepcionista */}
+      {esRecepcionista && (
+        <div className="px-3 pb-4">
+          <button
+            onClick={() => navigate('/doctores/nuevo')}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            + Agregar Doctor
+          </button>
+        </div>
+      )}
     </aside>
   )
 }

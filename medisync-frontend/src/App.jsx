@@ -15,6 +15,7 @@ import { AgendaDoctorPage } from './pages/AgendaDoctorPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { MisCitasPage } from './pages/MisCitasPage'
+import { DoctorNuevoPage } from './pages/DoctorNuevoPage'
 
 // Ruta privada para clínica (recepcionista/doctor)
 function RutaClinica({ children }) {
@@ -73,6 +74,7 @@ function AppRoutes() {
         <Route path="pacientes/nuevo" element={<PacienteNuevoPage />} />
         <Route path="pacientes/:id" element={<PacienteDetallePage />} />
         <Route path="doctores" element={<DoctoresPage />} />
+        <Route path="doctores/nuevo" element={<DoctorNuevoPage />} />
         <Route path="citas/nueva" element={<CitaNuevaPage />} />
         <Route path="citas/:id" element={<CitaDetallePage />} />
         <Route path="citas/:id/editar" element={<CitaEditarPage />} />
