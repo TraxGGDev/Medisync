@@ -15,6 +15,7 @@ import { AgendaDoctorPage } from './pages/AgendaDoctorPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { MisCitasPage } from './pages/MisCitasPage'
+import { MiCitaDetallePage } from './pages/MiCitaDetallePage'
 import { DoctorNuevoPage } from './pages/DoctorNuevoPage'
 
 // Ruta privada para clínica (recepcionista/doctor)
@@ -55,7 +56,7 @@ function AppRoutes() {
         path="/mis-citas/:id"
         element={
           <RutaPaciente>
-            <MisCitasPage />
+            <MiCitaDetallePage />
           </RutaPaciente>
         }
       />

@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { register } from '../services/authService'
+import { getPacientes } from '../services/pacientesService'
 
 export function RegisterPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rol, setRol] = useState('recepcionista')
-  const [pacienteId, setPacienteId] = useState('')
+  const [numeroSeguro, setNumeroSeguro] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -15,18 +16,31 @@ export function RegisterPage() {
     e.preventDefault()
     setError(null)
 
-    if (rol === 'paciente' && !pacienteId) {
-      setError('Debes ingresar tu número de paciente')
+    if (rol === 'paciente' && !numeroSeguro.trim()) {
+      setError('Debes ingresar tu número de seguro')
       return
     }
 
     setLoading(true)
     try {
-      await register(email, password, rol, rol === 'paciente' ? Number(pacienteId) : null)
-      // Si es paciente, guardamos el paciente_id para usarlo después del login
+      // Si es paciente, buscar su ID por número de seguro
+      let pacienteId = null
       if (rol === 'paciente') {
-        localStorage.setItem('medisync_registro_paciente_id', pacienteId)
+        const pacientes = await getPacientes()
+        const pacienteEncontrado = pacientes.find(
+          (p) => p.numero_seguro.trim().toLowerCase() === numeroSeguro.trim().toLowerCase()
+        )
+        if (!pacienteEncontrado) {
+          setError('No se encontró ningún paciente con ese número de seguro. Verifica el dato o contacta a la clínica.')
+          setLoading(false)
+          return
+        }
+        pacienteId = pacienteEncontrado.id
+        // Guardar para usarlo después del login
+        localStorage.setItem('medisync_registro_paciente_id', String(pacienteId))
       }
+
+      await register(email, password, rol, pacienteId)
       navigate('/login')
     } catch (err) {
       setError(err.message || 'Error al registrar usuario')
@@ -84,7 +98,7 @@ export function RegisterPage() {
             </label>
             <select
               value={rol}
-              onChange={(e) => { setRol(e.target.value); setPacienteId('') }}
+              onChange={(e) => { setRol(e.target.value); setNumeroSeguro('') }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="recepcionista">Personal de clínica (Recepcionista)</option>
@@ -95,18 +109,18 @@ export function RegisterPage() {
           {rol === 'paciente' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Número de paciente <span className="text-red-500">*</span>
+                Número de seguro <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
-                value={pacienteId}
-                onChange={(e) => setPacienteId(e.target.value)}
+                type="text"
+                value={numeroSeguro}
+                onChange={(e) => setNumeroSeguro(e.target.value)}
                 required
-                placeholder="ID asignado por la clínica"
+                placeholder="Ej. IMSS-001234"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Este número te lo proporciona la clínica al registrarte como paciente.
+                Ingresa el número de seguro con el que te registró la clínica.
               </p>
             </div>
           )}
@@ -116,7 +130,7 @@ export function RegisterPage() {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-2 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'Registrando...' : 'Crear cuenta'}
+            {loading ? 'Verificando...' : 'Crear cuenta'}
           </button>
         </form>
 
