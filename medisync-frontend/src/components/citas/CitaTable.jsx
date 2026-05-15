@@ -1,9 +1,15 @@
 import { LoadingSpinner } from '../ui/LoadingSpinner'
 import { EmptyState } from '../ui/EmptyState'
 import { StatusBadge } from '../ui/StatusBadge'
-import { formatHora } from '../../lib/utils'
+import { formatHora, formatFecha } from '../../lib/utils'
 
-export function CitaTable({ citas = [], loading, onRowClick, emptyMessage = 'No hay citas disponibles.' }) {
+export function CitaTable({
+  citas = [],
+  loading,
+  onRowClick,
+  emptyMessage = 'No hay citas disponibles.',
+  mostrarFechaCreacion = false,
+}) {
   if (loading) return <LoadingSpinner />
 
   if (citas.length === 0) {
@@ -20,6 +26,9 @@ export function CitaTable({ citas = [], loading, onRowClick, emptyMessage = 'No 
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Motivo</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+            {mostrarFechaCreacion && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registrada</th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
@@ -38,6 +47,11 @@ export function CitaTable({ citas = [], loading, onRowClick, emptyMessage = 'No 
               <td className="px-6 py-4">
                 <StatusBadge estado={c.estado} />
               </td>
+              {mostrarFechaCreacion && (
+                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                  {c.fecha_creacion ? formatFecha(c.fecha_creacion) : '—'}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

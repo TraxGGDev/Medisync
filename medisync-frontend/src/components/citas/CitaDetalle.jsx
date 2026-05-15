@@ -83,6 +83,12 @@ export function CitaDetalle({ cita, onCancelConfirm, onEstadoChange }) {
               <dt className="text-sm text-gray-500 w-32">Motivo</dt>
               <dd className="text-sm text-gray-700">{cita.motivo}</dd>
             </div>
+            {cita.fecha_creacion && (
+              <div className="flex gap-4">
+                <dt className="text-sm text-gray-500 w-32">Registrada</dt>
+                <dd className="text-sm text-gray-700">{formatFecha(cita.fecha_creacion)}</dd>
+              </div>
+            )}
           </dl>
         </div>
       </div>

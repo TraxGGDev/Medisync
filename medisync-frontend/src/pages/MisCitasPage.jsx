@@ -67,6 +67,7 @@ export function MisCitasPage() {
             loading={loading}
             onRowClick={(id) => navigate(`/mis-citas/${id}`)}
             emptyMessage="No tienes citas registradas."
+            mostrarFechaCreacion
           />
         )}
       </main>
