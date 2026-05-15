@@ -7,7 +7,14 @@ export function DashboardPage() {
   const { data, loading, error, cargar } = useCitas()
   const navigate = useNavigate()
 
-  const hoy = useMemo(() => new Date().toISOString().substring(0, 10), [])
+  // Fecha local (no UTC) para evitar desfase de zona horaria
+  const hoy = useMemo(() => {
+    const d = new Date()
+    const yyyy = d.getFullYear()
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const dd = String(d.getDate()).padStart(2, '0')
+    return `${yyyy}-${mm}-${dd}`
+  }, [])
   const [fechaSeleccionada, setFechaSeleccionada] = useState(hoy)
 
   useEffect(() => {
